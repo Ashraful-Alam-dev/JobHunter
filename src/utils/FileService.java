@@ -74,4 +74,17 @@ public class FileService {
             e.printStackTrace();
         }
     }
+
+    public void createIfNotExists(String fileName) {
+        Path filePath = dataFolder.resolve(fileName);
+
+        try {
+            if (!Files.exists(filePath)) {
+                Files.createFile(filePath);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

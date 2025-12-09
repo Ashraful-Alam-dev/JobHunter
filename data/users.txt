@@ -1,1 +1,4 @@
-﻿1|admin|admin123|Admin|System Admin|admin@example.com|+880000000000
+﻿1a2b3c4d-0001|admin|admin123|admin|System Administrator|admin@example.com|1234567890|Administrator of the system
+c3c99303-85ca-4f10-b65d-eb19757eb5f8|nahid|nahid123|Recruiter|Nahid Imran|naa123@gmail.com|01511111111
+efd0c7b0-fac2-4f53-9783-e6f52a81ac04|nahid|nahid123|Recruiter|Nahid Imran|ny|014556|Software
+c51dd739-b11e-4b59-b731-eddc299ade45|mithila|mithila123|Applicant|Mithila jahan|moo|01457|Graduated from CSE, DIU
