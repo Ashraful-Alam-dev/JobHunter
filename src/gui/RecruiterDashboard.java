@@ -9,8 +9,11 @@ import services.JobService;
 import utils.FileService;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 public class RecruiterDashboard extends JFrame {
@@ -32,7 +35,7 @@ public class RecruiterDashboard extends JFrame {
         this.applicationService = new ApplicationService(fs);
 
         setTitle("Recruiter Dashboard");
-        setSize(900, 600);
+        setSize(1024, 768);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -40,38 +43,103 @@ public class RecruiterDashboard extends JFrame {
     }
 
     private void initUI() {
+        add(createTopBar(), BorderLayout.NORTH);
+
         JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(new Font("SansSerif", Font.PLAIN, 16));
 
-        // Jobs tab
-        tabs.add("My Jobs", createJobPanel());
+        tabs.add("My Jobs", wrapPanel(createJobPanel()));
+        tabs.add("Applications", wrapPanel(createApplicationPanel()));
 
-        // Applications tab
-        tabs.add("Applications", createApplicationPanel());
-
-        add(tabs);
+        add(tabs, BorderLayout.CENTER);
     }
 
-    // -----------------------------
-    // JOB PANEL
-    // -----------------------------
+    private JPanel createTopBar() {
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel title = new JLabel(getTitle());
+        title.setFont(new Font("SansSerif", Font.BOLD, 22));
+
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        left.add(title);
+
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        JButton btnProfile = new JButton("Manage Profile");
+        btnProfile.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnProfile.addActionListener(e -> new ProfileForm(recruiter, authService).setVisible(true));
+        right.add(btnProfile);
+
+        JButton btnLogout = new JButton("Logout");
+        btnLogout.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnLogout.addActionListener(e -> {
+            new LoginForm(authService).setVisible(true);
+            dispose();
+        });
+        right.add(btnLogout);
+
+        topBar.add(left, BorderLayout.WEST);
+        topBar.add(right, BorderLayout.EAST);
+
+        return topBar;
+    }
+
     private JPanel createJobPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
         jobTable = new JTable();
+        jobTable.setRowHeight(24);
+        jobTable.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        ((DefaultTableCellRenderer) jobTable.getTableHeader().getDefaultRenderer())
+                .setFont(new Font("SansSerif", Font.BOLD, 16));
+
         loadJobs();
 
         JPanel btnPanel = new JPanel();
         JButton btnPost = new JButton("Post Job");
         JButton btnUpdate = new JButton("Update Job");
         JButton btnDelete = new JButton("Delete Job");
+        JButton btnViewJob = new JButton("View Job Details"); // NEW
 
-        btnPost.addActionListener(e -> new JobPostForm(recruiter, jobService).setVisible(true));
+        btnPost.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnUpdate.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnDelete.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnViewJob.setFont(new Font("SansSerif", Font.PLAIN, 16));
+
+        btnPost.addActionListener(e -> {
+            JobPostForm postForm = new JobPostForm(recruiter, jobService);
+            postForm.setVisible(true);
+            postForm.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    loadJobs();
+                }
+            });
+        });
+
         btnUpdate.addActionListener(e -> updateSelectedJob());
         btnDelete.addActionListener(e -> deleteSelectedJob());
+
+        btnViewJob.addActionListener(e -> {
+            int row = jobTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Select a job first!");
+                return;
+            }
+            String details = "ID: " + jobTable.getValueAt(row, 0) +
+                    "\nTitle: " + jobTable.getValueAt(row, 1) +
+                    "\nDescription: " + jobTable.getValueAt(row, 2) +
+                    "\nCompany: " + jobTable.getValueAt(row, 3) +
+                    "\nSalary: " + jobTable.getValueAt(row, 4) +
+                    "\nStatus: " + jobTable.getValueAt(row, 5);
+            JOptionPane.showMessageDialog(this, details, "Job Details", JOptionPane.INFORMATION_MESSAGE);
+        });
 
         btnPanel.add(btnPost);
         btnPanel.add(btnUpdate);
         btnPanel.add(btnDelete);
+        btnPanel.add(btnViewJob);
 
         panel.add(new JScrollPane(jobTable), BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
@@ -82,14 +150,19 @@ public class RecruiterDashboard extends JFrame {
     private void loadJobs() {
         List<Job> jobs = jobService.getJobsByRecruiter(recruiter.getUserId());
 
-        String[] cols = {"ID", "Title", "Description", "Status"};
-        DefaultTableModel model = new DefaultTableModel(cols, 0);
+        String[] cols = {"ID", "Title", "Description", "Company", "Salary Range", "Status"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
 
         for (Job j : jobs) {
             model.addRow(new Object[]{
                     j.getJobId(),
                     j.getTitle(),
                     j.getDescription(),
+                    j.getCompanyName(),
+                    j.getSalaryRange(),
                     j.getStatus()
             });
         }
@@ -104,11 +177,14 @@ public class RecruiterDashboard extends JFrame {
             return;
         }
 
-        String jobId = jobTable.getValueAt(row, 0).toString();
-        String title = jobTable.getValueAt(row, 1).toString();
-        String desc = jobTable.getValueAt(row, 2).toString();
-
-        new JobUpdateForm(jobId, title, desc, jobService).setVisible(true);
+        new JobUpdateForm(
+                jobTable.getValueAt(row, 0).toString(),
+                jobTable.getValueAt(row, 1).toString(),
+                jobTable.getValueAt(row, 2).toString(),
+                jobTable.getValueAt(row, 3).toString(),
+                jobTable.getValueAt(row, 4).toString(),
+                jobService
+        ).setVisible(true);
     }
 
     private void deleteSelectedJob() {
@@ -123,31 +199,68 @@ public class RecruiterDashboard extends JFrame {
         if (jobService.deleteJob(jobId)) {
             JOptionPane.showMessageDialog(this, "Job deleted!");
             loadJobs();
-            loadApplications(); // refresh applications too
+            loadApplications();
         }
     }
 
-    // -----------------------------
-    // APPLICATION PANEL
-    // -----------------------------
     private JPanel createApplicationPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
         appTable = new JTable();
+        appTable.setRowHeight(24);
+        appTable.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        ((DefaultTableCellRenderer) appTable.getTableHeader().getDefaultRenderer())
+                .setFont(new Font("SansSerif", Font.BOLD, 16));
+
         loadApplications();
 
         JPanel btnPanel = new JPanel();
-        JButton btnViewProfile = new JButton("View Applicant Profile");
         JButton btnAccept = new JButton("Accept");
         JButton btnCancel = new JButton("Cancel");
+        JButton btnViewApp = new JButton("View Applicant/Application Details"); // Only one button
 
-        btnViewProfile.addActionListener(e -> viewApplicantProfile());
+        btnAccept.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnCancel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnViewApp.setFont(new Font("SansSerif", Font.PLAIN, 16));
+
         btnAccept.addActionListener(e -> updateApplicationStatus("Accepted"));
         btnCancel.addActionListener(e -> updateApplicationStatus("Cancelled"));
 
-        btnPanel.add(btnViewProfile);
+        btnViewApp.addActionListener(e -> {
+            int row = appTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Select an application first!");
+                return;
+            }
+
+            String appId = appTable.getValueAt(row, 0).toString();
+            String jobTitle = appTable.getValueAt(row, 1).toString();
+            String applicantName = appTable.getValueAt(row, 2).toString();
+            String status = appTable.getValueAt(row, 3).toString();
+
+            User applicant = authService.getAllUsers().stream()
+                    .filter(u -> u.getName().equals(applicantName))
+                    .findFirst()
+                    .orElse(null);
+
+            String details = "Application ID: " + appId +
+                    "\nJob Title: " + jobTitle +
+                    "\nStatus: " + status;
+
+            if (applicant != null) {
+                details += "\n\nApplicant Details:\n" +
+                        "Name: " + applicant.getName() +
+                        "\nEmail: " + applicant.getEmail() +
+                        "\nContact: " + applicant.getContact() +
+                        "\nDescription: " + applicant.getDescription();
+            }
+
+            JOptionPane.showMessageDialog(this, details, "Application & Applicant Details", JOptionPane.INFORMATION_MESSAGE);
+        });
+
         btnPanel.add(btnAccept);
         btnPanel.add(btnCancel);
+        btnPanel.add(btnViewApp);
 
         panel.add(new JScrollPane(appTable), BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
@@ -160,7 +273,10 @@ public class RecruiterDashboard extends JFrame {
         List<Application> allApps = applicationService.getAllApplications();
 
         String[] cols = {"Application ID", "Job Title", "Applicant Name", "Status"};
-        DefaultTableModel model = new DefaultTableModel(cols, 0);
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
 
         for (Job j : jobs) {
             for (Application a : allApps) {
@@ -185,30 +301,6 @@ public class RecruiterDashboard extends JFrame {
         appTable.setModel(model);
     }
 
-    private void viewApplicantProfile() {
-        int row = appTable.getSelectedRow();
-        if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Select an application first!");
-            return;
-        }
-
-        String applicantName = appTable.getValueAt(row, 2).toString();
-        User applicant = authService.getAllUsers().stream()
-                .filter(u -> u.getName().equals(applicantName))
-                .findFirst()
-                .orElse(null);
-
-        if (applicant != null) {
-            JOptionPane.showMessageDialog(this,
-                    "Name: " + applicant.getName() +
-                            "\nEmail: " + applicant.getEmail() +
-                            "\nContact: " + applicant.getContact() +
-                            "\nDescription: " + applicant.getDescription(),
-                    "Applicant Profile",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
     private void updateApplicationStatus(String newStatus) {
         int row = appTable.getSelectedRow();
         if (row == -1) {
@@ -219,8 +311,15 @@ public class RecruiterDashboard extends JFrame {
         String appId = appTable.getValueAt(row, 0).toString();
 
         if (applicationService.updateStatus(appId, newStatus)) {
-            JOptionPane.showMessageDialog(this, "Application status updated -> " + newStatus);
+            JOptionPane.showMessageDialog(this, "Application status updated → " + newStatus);
             loadApplications();
         }
+    }
+
+    private JPanel wrapPanel(JPanel p) {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        wrapper.add(p, BorderLayout.CENTER);
+        return wrapper;
     }
 }

@@ -12,22 +12,26 @@ public class JobUpdateForm extends JFrame {
     private String jobId;
     private JTextField titleField;
     private JTextArea descArea;
+    private JTextField companyField;
+    private JTextField salaryField;
 
-    public JobUpdateForm(String jobId, String oldTitle, String oldDesc, JobService jobService) {
+    public JobUpdateForm(String jobId, String oldTitle, String oldDesc,
+                         String oldCompany, String oldSalary, JobService jobService) {
+
         this.jobId = jobId;
         this.jobService = jobService;
 
         setTitle("Update Job");
-        setSize(400, 350);
+        setSize(400, 450);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        initUI(oldTitle, oldDesc);
+        initUI(oldTitle, oldDesc, oldCompany, oldSalary);
     }
 
-    private void initUI(String oldTitle, String oldDesc) {
+    private void initUI(String oldTitle, String oldDesc, String oldCompany, String oldSalary) {
 
-        JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(8, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
         panel.add(new JLabel("Job Title:"));
@@ -38,9 +42,30 @@ public class JobUpdateForm extends JFrame {
         descArea = new JTextArea(oldDesc);
         panel.add(new JScrollPane(descArea));
 
+        panel.add(new JLabel("Company Name (optional):"));
+        companyField = new JTextField(oldCompany);
+        panel.add(companyField);
+
+        panel.add(new JLabel("Salary Range (required):"));
+        salaryField = new JTextField(oldSalary);
+        panel.add(salaryField);
+
         JButton btnSave = new JButton("Save Changes");
         btnSave.addActionListener(e -> {
-            if (jobService.updateJob(jobId, titleField.getText(), descArea.getText())) {
+            if (titleField.getText().trim().isEmpty() ||
+                    descArea.getText().trim().isEmpty() ||
+                    salaryField.getText().trim().isEmpty()) {
+
+                JOptionPane.showMessageDialog(this, "Title, Description, and Salary are required!");
+                return;
+            }
+
+            if (jobService.updateJob(jobId,
+                    titleField.getText().trim(),
+                    descArea.getText().trim(),
+                    companyField.getText().trim(),
+                    salaryField.getText().trim())) {
+
                 JOptionPane.showMessageDialog(this, "Job updated! Requires re-approval.");
                 dispose();
             }

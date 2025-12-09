@@ -21,41 +21,54 @@ public class ProfileForm extends JFrame {
         this.authService = authService;
 
         setTitle("Edit Profile");
-        setSize(400, 300);
+        setSize(600, 450);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         initUI();
     }
 
     private void initUI() {
-        JPanel panel = new JPanel(new GridLayout(7, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(9, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
-        // Name
-        panel.add(new JLabel("Full Name:"));
+        Font labelFont = new Font("SansSerif", Font.PLAIN, 16);
+        Font fieldFont = new Font("SansSerif", Font.PLAIN, 16);
+
+        JLabel lblName = new JLabel("Full Name:");
+        lblName.setFont(labelFont);
+        panel.add(lblName);
         nameField = new JTextField(user.getName());
+        nameField.setFont(fieldFont);
         panel.add(nameField);
 
-        // Email
-        panel.add(new JLabel("Email:"));
+        JLabel lblEmail = new JLabel("Email:");
+        lblEmail.setFont(labelFont);
+        panel.add(lblEmail);
         emailField = new JTextField(user.getEmail());
+        emailField.setFont(fieldFont);
         panel.add(emailField);
 
-        // Contact
-        panel.add(new JLabel("Contact:"));
+        JLabel lblContact = new JLabel("Contact:");
+        lblContact.setFont(labelFont);
+        panel.add(lblContact);
         contactField = new JTextField(user.getContact());
+        contactField.setFont(fieldFont);
         panel.add(contactField);
 
-        panel.add(new JLabel("Description:"));
-        contactField = new JTextField(user.getDescription());
+        JLabel lblDesc = new JLabel("Description:");
+        lblDesc.setFont(labelFont);
+        panel.add(lblDesc);
+        descriptionField = new JTextField(user.getDescription());
+        descriptionField.setFont(fieldFont);
         panel.add(descriptionField);
 
-        // Save Button
         JButton btnSave = new JButton("Save");
+        btnSave.setFont(new Font("SansSerif", Font.BOLD, 16));
         btnSave.addActionListener(e -> {
             boolean ok = authService.updateProfile(
-                    user.getUserId(), // corrected getter
+                    user.getUserId(),
                     nameField.getText().trim(),
                     emailField.getText().trim(),
                     contactField.getText().trim(),
@@ -69,7 +82,6 @@ public class ProfileForm extends JFrame {
                 JOptionPane.showMessageDialog(this, "Failed to update profile.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-
         panel.add(btnSave);
 
         add(panel, BorderLayout.CENTER);

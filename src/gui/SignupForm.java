@@ -23,7 +23,7 @@ public class SignupForm extends JFrame {
         this.authService = authService;
 
         setTitle("JobHunter - Create Account");
-        setSize(450, 400);
+        setSize(600, 450);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -32,43 +32,68 @@ public class SignupForm extends JFrame {
     }
 
     private void initUI() {
+        JPanel panel = new JPanel(new GridLayout(12, 1, 10, 10)); // bigger gaps
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50)); // more padding
 
-        JPanel panel = new JPanel(new GridLayout(12, 1, 8, 8));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        Font labelFont = new Font("SansSerif", Font.BOLD, 18);
+        Font fieldFont = new Font("SansSerif", Font.PLAIN, 16);
+        Font buttonFont = new Font("SansSerif", Font.BOLD, 16);
 
-        // Labels + Inputs
-        panel.add(new JLabel("Username:"));
+        JLabel lblUsername = new JLabel("Username:");
+        lblUsername.setFont(labelFont);
         usernameField = new JTextField();
+        usernameField.setFont(fieldFont);
+        panel.add(lblUsername);
         panel.add(usernameField);
 
-        panel.add(new JLabel("Password:"));
+        JLabel lblPassword = new JLabel("Password:");
+        lblPassword.setFont(labelFont);
         passwordField = new JPasswordField();
+        passwordField.setFont(fieldFont);
+        panel.add(lblPassword);
         panel.add(passwordField);
 
-        panel.add(new JLabel("Full Name:"));
+        JLabel lblName = new JLabel("Full Name:");
+        lblName.setFont(labelFont);
         nameField = new JTextField();
+        nameField.setFont(fieldFont);
+        panel.add(lblName);
         panel.add(nameField);
 
-        panel.add(new JLabel("Email:"));
+        JLabel lblEmail = new JLabel("Email:");
+        lblEmail.setFont(labelFont);
         emailField = new JTextField();
+        emailField.setFont(fieldFont);
+        panel.add(lblEmail);
         panel.add(emailField);
 
-        panel.add(new JLabel("Contact No.:"));
+        JLabel lblContact = new JLabel("Contact No.:");
+        lblContact.setFont(labelFont);
         contactField = new JTextField();
+        contactField.setFont(fieldFont);
+        panel.add(lblContact);
         panel.add(contactField);
 
-        panel.add(new JLabel("Description:"));
+        JLabel lblDescription = new JLabel("Description:");
+        lblDescription.setFont(labelFont);
         descriptionField = new JTextField();
+        descriptionField.setFont(fieldFont);
+        panel.add(lblDescription);
         panel.add(descriptionField);
 
-        panel.add(new JLabel("Select Role:"));
+        JLabel lblRole = new JLabel("Select Role:");
+        lblRole.setFont(labelFont);
         roleBox = new JComboBox<>(new String[]{"Recruiter", "Applicant"});
+        roleBox.setFont(fieldFont);
+        panel.add(lblRole);
         panel.add(roleBox);
 
         JButton btnSignup = new JButton("Create Account");
+        btnSignup.setFont(buttonFont);
         btnSignup.addActionListener(this::handleSignup);
 
         JButton btnBack = new JButton("Back to Login");
+        btnBack.setFont(buttonFont);
         btnBack.addActionListener(e -> {
             new LoginForm(authService).setVisible(true);
             dispose();
@@ -90,7 +115,6 @@ public class SignupForm extends JFrame {
         String description = descriptionField.getText().trim();
         String role = roleBox.getSelectedItem().toString();
 
-        // --- Validations ---
         if (username.isEmpty() || password.isEmpty() || name.isEmpty() ||
                 email.isEmpty() || contact.isEmpty() || description.isEmpty()) {
             JOptionPane.showMessageDialog(this,

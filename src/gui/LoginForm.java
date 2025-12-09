@@ -17,7 +17,7 @@ public class LoginForm extends JFrame {
     public LoginForm(AuthService authService) {
         this.authService = authService;
         setTitle("JobHunter - Login");
-        setSize(400, 300);
+        setSize(600, 450);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -26,19 +26,29 @@ public class LoginForm extends JFrame {
     }
 
     private void initUI() {
-        JPanel panel = new JPanel(new GridLayout(6, 1, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        JPanel panel = new JPanel(new GridLayout(6, 1, 15, 15)); // slightly more spacing
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+
+        Font labelFont = new Font("SansSerif", Font.BOLD, 18);
+        Font fieldFont = new Font("SansSerif", Font.PLAIN, 16);
+        Font buttonFont = new Font("SansSerif", Font.BOLD, 16);
 
         JLabel lblUser = new JLabel("Username:");
+        lblUser.setFont(labelFont);
         usernameField = new JTextField();
+        usernameField.setFont(fieldFont);
 
         JLabel lblPass = new JLabel("Password:");
+        lblPass.setFont(labelFont);
         passwordField = new JPasswordField();
+        passwordField.setFont(fieldFont);
 
         JButton btnLogin = new JButton("Login");
+        btnLogin.setFont(buttonFont);
         btnLogin.addActionListener(this::handleLogin);
 
         JButton btnSignup = new JButton("Create Account");
+        btnSignup.setFont(buttonFont);
         btnSignup.addActionListener(e -> {
             SignupForm signup = new SignupForm(authService);
             signup.setVisible(true);
@@ -77,7 +87,7 @@ public class LoginForm extends JFrame {
 
     private void openDashboard(String role, User user) {
         switch (role.toLowerCase()) {
-            case "admin" -> new AdminDashboard(authService).setVisible(true);
+            case "admin" -> new AdminDashboard(authService, user).setVisible(true);
             case "recruiter" -> new RecruiterDashboard(user, authService).setVisible(true);
             case "applicant" -> new ApplicantDashboard(user, authService).setVisible(true);
             default -> JOptionPane.showMessageDialog(this, "Unknown role: " + role);

@@ -24,7 +24,6 @@ public class User {
         this.description = description;
     }
 
-    // Getters
     public String getUserId() { return userId; }
     public String getUsername() { return username; }
     public String getPassword() { return password; }
@@ -34,7 +33,6 @@ public class User {
     public String getContact() { return contact; }
     public String getDescription() { return description; }
 
-    // Setters
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
     public void setContact(String contact) { this.contact = contact; }

@@ -10,7 +10,6 @@ import java.util.UUID;
 public class ApplicationService {
 
     private FileService fileService;
-
     private static final String APP_FILE = "applications.txt";
 
     public ApplicationService(FileService fileService) {
@@ -21,7 +20,6 @@ public class ApplicationService {
     public List<Application> getAllApplications() {
         List<String> lines = fileService.readAllLines(APP_FILE);
         List<Application> apps = new ArrayList<>();
-
         for (String line : lines) {
             Application a = Application.fromLine(line);
             if (a != null) apps.add(a);
@@ -40,7 +38,6 @@ public class ApplicationService {
         String status = "Pending";
 
         Application app = new Application(applicationId, jobId, applicantId, status);
-
         fileService.appendLine(APP_FILE, app.toLine());
         return true;
     }
@@ -49,15 +46,6 @@ public class ApplicationService {
         List<Application> result = new ArrayList<>();
         for (Application a : getAllApplications()) {
             if (a.getApplicantId().equals(applicantId))
-                result.add(a);
-        }
-        return result;
-    }
-
-    public List<Application> getApplicationsForJob(String jobId) {
-        List<Application> result = new ArrayList<>();
-        for (Application a : getAllApplications()) {
-            if (a.getJobId().equals(jobId))
                 result.add(a);
         }
         return result;

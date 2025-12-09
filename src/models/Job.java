@@ -6,56 +6,64 @@ public class Job {
     private String recruiterId;
     private String title;
     private String description;
-    private String status; // Pending, Verified, Approved
+    private String companyName;   // optional
+    private String salaryRange;   // required
+    private String status;        // Pending, Approved, Rejected
 
-    public Job(String jobId, String recruiterId, String title, String description, String status) {
+    public Job(String jobId, String recruiterId, String title, String description,
+               String companyName, String salaryRange, String status) {
+
         this.jobId = jobId;
         this.recruiterId = recruiterId;
         this.title = title;
         this.description = description;
+        this.companyName = companyName == null ? "" : companyName;
+        this.salaryRange = salaryRange;
         this.status = status;
     }
 
-    // Create a Job object from a line in the file
     public static Job fromLine(String line) {
         String[] p = line.split("\\|");
-        if (p.length < 5) return null;
+
+        if (p.length != 7) return null;
 
         return new Job(
-                p[0], // jobId
-                p[1], // recruiterId
-                p[2], // title
-                p[3], // description
-                p[4]  // status
+                p[0],
+                p[1],
+                p[2],
+                p[3],
+                p[4],
+                p[5],
+                p[6]
         );
     }
 
-    // Convert a Job object to a line for file storage
     public String toLine() {
         return String.join("|",
-                jobId, recruiterId, title, description, status
+                jobId,
+                recruiterId,
+                title,
+                description,
+                companyName,
+                salaryRange,
+                status
         );
     }
 
-    // -------------------------
-    // Getters
-    // -------------------------
     public String getJobId() { return jobId; }
     public String getRecruiterId() { return recruiterId; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
+    public String getCompanyName() { return companyName; }
+    public String getSalaryRange() { return salaryRange; }
     public String getStatus() { return status; }
 
-    // -------------------------
-    // Setters
-    // -------------------------
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
+    public void setSalaryRange(String salaryRange) { this.salaryRange = salaryRange; }
     public void setStatus(String status) { this.status = status; }
 
-    // -------------------------
-    // Optional: for debugging
-    // -------------------------
     @Override
     public String toString() {
         return "Job{" +
@@ -63,6 +71,8 @@ public class Job {
                 ", recruiterId='" + recruiterId + '\'' +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
+                ", companyName='" + companyName + '\'' +
+                ", salaryRange='" + salaryRange + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }
