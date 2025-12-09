@@ -14,13 +14,9 @@ public class JobService {
 
     public JobService(FileService fileService) {
         this.fileService = fileService;
-        // Ensure file exists
         fileService.createIfNotExists(JOB_FILE);
     }
 
-    // ------------------------------
-    // Get All Jobs
-    // ------------------------------
     public List<Job> getAllJobs() {
         List<String> lines = fileService.readAllLines(JOB_FILE);
         List<Job> jobs = new ArrayList<>();
@@ -33,9 +29,6 @@ public class JobService {
         return jobs;
     }
 
-    // ------------------------------
-    // Save All Jobs
-    // ------------------------------
     private void saveAll(List<Job> jobs) {
         List<String> lines = new ArrayList<>();
         for (Job j : jobs) {
@@ -44,22 +37,24 @@ public class JobService {
         fileService.writeAllLines(JOB_FILE, lines);
     }
 
-    // ------------------------------
-    // Post Job
-    // ------------------------------
-    public boolean postJob(String recruiterId, String title, String description) {
+    public boolean postJob(String recruiterId, String title, String description,
+                           String companyName, String salaryRange) {
+
+        if (salaryRange == null || salaryRange.isEmpty()) return false;
+
         String jobId = UUID.randomUUID().toString();
         String status = "Pending";
-        Job job = new Job(jobId, recruiterId, title, description, status);
 
+        Job job = new Job(jobId, recruiterId, title, description, companyName, salaryRange, status);
         fileService.appendLine(JOB_FILE, job.toLine());
         return true;
     }
 
-    // ------------------------------
-    // Update Job
-    // ------------------------------
-    public boolean updateJob(String jobId, String newTitle, String newDesc) {
+    public boolean updateJob(String jobId, String newTitle, String newDesc,
+                             String newCompany, String newSalary) {
+
+        if (newSalary == null || newSalary.isEmpty()) return false;
+
         List<Job> jobs = getAllJobs();
         boolean updated = false;
 
@@ -67,7 +62,9 @@ public class JobService {
             if (j.getJobId().equals(jobId)) {
                 j.setTitle(newTitle);
                 j.setDescription(newDesc);
-                j.setStatus("Pending"); // reset approval on update
+                j.setCompanyName(newCompany);
+                j.setSalaryRange(newSalary);
+                j.setStatus("Pending");
                 updated = true;
                 break;
             }
@@ -77,29 +74,12 @@ public class JobService {
         return updated;
     }
 
-    // ------------------------------
-    // Delete Job
-    // ------------------------------
     public boolean deleteJob(String jobId) {
         List<Job> jobs = getAllJobs();
         boolean removed = jobs.removeIf(j -> j.getJobId().equals(jobId));
 
         if (removed) saveAll(jobs);
         return removed;
-    }
-
-    // ------------------------------
-    // Admin Approve Job
-    // ------------------------------
-    public boolean approveJob(String jobId) {
-        return updateStatus(jobId, "Approved");
-    }
-
-    // ------------------------------
-    // Admin Reject Job
-    // ------------------------------
-    public boolean rejectJob(String jobId) {
-        return updateStatus(jobId, "Rejected");
     }
 
     public boolean updateStatus(String jobId, String status) {
@@ -118,9 +98,6 @@ public class JobService {
         return updated;
     }
 
-    // ------------------------------
-    // Get All Approved Jobs
-    // ------------------------------
     public List<Job> getApprovedJobs() {
         List<Job> result = new ArrayList<>();
         for (Job j : getAllJobs()) {
@@ -131,9 +108,6 @@ public class JobService {
         return result;
     }
 
-    // ------------------------------
-    // Get Jobs By Recruiter
-    // ------------------------------
     public List<Job> getJobsByRecruiter(String recruiterId) {
         List<Job> result = new ArrayList<>();
         for (Job j : getAllJobs()) {
@@ -142,5 +116,17 @@ public class JobService {
             }
         }
         return result;
+    }
+
+    // ------------------------------
+    // NEW: Get Job by ID
+    // ------------------------------
+    public Job getJobById(String jobId) {
+        for (Job j : getAllJobs()) {
+            if (j.getJobId().equals(jobId)) {
+                return j;
+            }
+        }
+        return null;
     }
 }

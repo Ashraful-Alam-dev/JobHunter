@@ -21,9 +21,6 @@ public class FileService {
         }
     }
 
-    // ------------------------------
-    // READ ALL LINES
-    // ------------------------------
     public List<String> readAllLines(String fileName) {
         Path filePath = dataFolder.resolve(fileName);
 
@@ -39,9 +36,6 @@ public class FileService {
         }
     }
 
-    // ------------------------------
-    // APPEND A SINGLE LINE
-    // ------------------------------
     public void appendLine(String fileName, String line) {
         Path filePath = dataFolder.resolve(fileName);
 
@@ -57,9 +51,6 @@ public class FileService {
         }
     }
 
-    // ------------------------------
-    // WRITE (OVERWRITE) ALL LINES
-    // ------------------------------
     public void writeAllLines(String fileName, List<String> lines) {
         Path filePath = dataFolder.resolve(fileName);
 
@@ -86,5 +77,4 @@ public class FileService {
             e.printStackTrace();
         }
     }
-
 }

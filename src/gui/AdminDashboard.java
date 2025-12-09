@@ -1,10 +1,12 @@
 package gui;
 
 import models.Job;
+import models.User;
 import services.AuthService;
 import services.JobService;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -13,64 +15,148 @@ public class AdminDashboard extends JFrame {
 
     private final JobService jobService;
     private final AuthService authService;
+    private final User currentUser;
 
     private JTable jobTable;
 
-    // Constructor accepts existing AuthService
-    public AdminDashboard(AuthService authService) {
+    public AdminDashboard(AuthService authService, User currentUser) {
         this.authService = authService;
+        this.currentUser = currentUser;
         this.jobService = new JobService(authService.getFileService());
 
         setTitle("Admin Dashboard");
-        setSize(800, 500);
+        setSize(1024, 768);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        getContentPane().setBackground(new Color(245, 247, 250));
 
         initUI();
     }
 
     private void initUI() {
+
+        add(createTopBar(), BorderLayout.NORTH);
+
         JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        tabs.setBackground(new Color(220, 220, 220));
+        tabs.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
 
-        // Jobs Tab
-        tabs.add("Job Management", createJobPanel());
+        tabs.add("Job Management", wrapPanel(createJobPanel()));
 
-        // User List Tab -> Open UserListView on button click
         JPanel userPanel = new JPanel(new FlowLayout());
+        userPanel.setBackground(Color.WHITE);
+
         JButton btnViewUsers = new JButton("View All Users");
-        btnViewUsers.addActionListener(e -> {
-            // Only admins can see this
-            new UserListView(authService).setVisible(true);
-        });
+        btnViewUsers.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnViewUsers.setBackground(new Color(235, 235, 235));
+        btnViewUsers.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        btnViewUsers.setFocusPainted(false);
+        btnViewUsers.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        btnViewUsers.addActionListener(e ->
+                new UserListView(authService, currentUser).setVisible(true));
+
         userPanel.add(btnViewUsers);
 
-        tabs.add("User Management", userPanel);
+        tabs.add("User Management", wrapPanel(userPanel));
 
-        add(tabs);
+        add(tabs, BorderLayout.CENTER);
     }
 
-    // -----------------------------------------
-    // JOB PANEL
-    // -----------------------------------------
+    private JPanel createTopBar() {
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        topBar.setBackground(Color.WHITE);
+
+        JLabel title = new JLabel(getTitle());
+        title.setFont(new Font("SansSerif", Font.BOLD, 22));
+        title.setForeground(new Color(40, 40, 40));
+
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        left.setBackground(Color.WHITE);
+        left.add(title);
+
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        right.setBackground(Color.WHITE);
+
+        JButton btnLogout = new JButton("Logout");
+        btnLogout.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnLogout.setBackground(new Color(230, 230, 230));
+        btnLogout.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        btnLogout.setFocusPainted(false);
+        btnLogout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        btnLogout.addActionListener(e -> {
+            new LoginForm(authService).setVisible(true);
+            dispose();
+        });
+
+        right.add(btnLogout);
+
+        topBar.add(left, BorderLayout.WEST);
+        topBar.add(right, BorderLayout.EAST);
+
+        return topBar;
+    }
+
     private JPanel createJobPanel() {
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
 
         jobTable = new JTable();
+        jobTable.setRowHeight(26);
+        jobTable.setFont(new Font("SansSerif", Font.PLAIN, 15));
+
+        jobTable.setShowGrid(true);
+        jobTable.setGridColor(new Color(215, 215, 215));
+        jobTable.setIntercellSpacing(new Dimension(6, 6));
+
+        jobTable.setBackground(Color.WHITE);
+        jobTable.setForeground(Color.BLACK);
+
+        JTableHeaderRenderer headerRenderer = new JTableHeaderRenderer();
+        jobTable.getTableHeader().setDefaultRenderer(headerRenderer);
+        jobTable.getTableHeader().setPreferredSize(new Dimension(0, 32));
+
         loadJobs();
 
-        JPanel btnPanel = new JPanel();
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 12));
+        btnPanel.setBackground(Color.WHITE);
+        btnPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
 
-        JButton btnVerify = new JButton("Verify Job");
-        JButton btnApprove = new JButton("Approve Job");
-        JButton btnDelete = new JButton("Delete Job");
+        JButton btnApprove = styledButton("Approve Job");
+        JButton btnReject = styledButton("Reject Job");
+        JButton btnDelete = styledButton("Delete Job");
+        JButton btnViewJob = styledButton("View Job Details");
 
-        btnVerify.addActionListener(e -> updateJobStatus("Verified"));
         btnApprove.addActionListener(e -> updateJobStatus("Approved"));
+        btnReject.addActionListener(e -> updateJobStatus("Rejected"));
         btnDelete.addActionListener(e -> deleteSelectedJob());
 
-        btnPanel.add(btnVerify);
+        btnViewJob.addActionListener(e -> {
+            int row = jobTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Select a job first!");
+                return;
+            }
+
+            String details = "Job ID: " + jobTable.getValueAt(row, 0) +
+                    "\nRecruiter ID: " + jobTable.getValueAt(row, 1) +
+                    "\nTitle: " + jobTable.getValueAt(row, 2) +
+                    "\nDescription: " + jobTable.getValueAt(row, 3) +
+                    "\nCompany: " + jobTable.getValueAt(row, 4) +
+                    "\nSalary Range: " + jobTable.getValueAt(row, 5) +
+                    "\nStatus: " + jobTable.getValueAt(row, 6);
+
+            JOptionPane.showMessageDialog(this, details, "Job Details", JOptionPane.INFORMATION_MESSAGE);
+        });
+
         btnPanel.add(btnApprove);
+        btnPanel.add(btnReject);
         btnPanel.add(btnDelete);
+        btnPanel.add(btnViewJob);
 
         panel.add(new JScrollPane(jobTable), BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
@@ -78,11 +164,40 @@ public class AdminDashboard extends JFrame {
         return panel;
     }
 
+    private JButton styledButton(String text) {
+        JButton b = new JButton(text);
+        b.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        b.setBackground(new Color(235, 235, 235));
+        b.setForeground(Color.BLACK);
+        b.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        b.setFocusPainted(false);
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return b;
+    }
+
+    private static class JTableHeaderRenderer extends DefaultTableCellRenderer {
+        public JTableHeaderRenderer() {
+            setFont(new Font("SansSerif", Font.BOLD, 15));
+            setHorizontalAlignment(CENTER);
+            setBackground(new Color(230, 230, 230));
+            setForeground(Color.BLACK);
+        }
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus,
+                                                       int row, int column) {
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            return this;
+        }
+    }
+
     private void loadJobs() {
         List<Job> jobs = jobService.getAllJobs();
 
-        String[] cols = {"ID", "Recruiter", "Title", "Description", "Status"};
-        DefaultTableModel model = new DefaultTableModel(cols, 0);
+        String[] cols = {"ID", "Recruiter", "Title", "Description", "Company", "Salary Range", "Status"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
 
         for (Job j : jobs) {
             model.addRow(new Object[]{
@@ -90,6 +205,8 @@ public class AdminDashboard extends JFrame {
                     j.getRecruiterId(),
                     j.getTitle(),
                     j.getDescription(),
+                    j.getCompanyName(),
+                    j.getSalaryRange(),
                     j.getStatus()
             });
         }
@@ -107,7 +224,7 @@ public class AdminDashboard extends JFrame {
         String jobId = jobTable.getValueAt(row, 0).toString();
 
         if (jobService.updateStatus(jobId, newStatus)) {
-            JOptionPane.showMessageDialog(this, "Status updated -> " + newStatus);
+            JOptionPane.showMessageDialog(this, "Status updated → " + newStatus);
             loadJobs();
         }
     }
@@ -125,5 +242,13 @@ public class AdminDashboard extends JFrame {
             JOptionPane.showMessageDialog(this, "Job deleted.");
             loadJobs();
         }
+    }
+
+    private JPanel wrapPanel(JPanel p) {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        wrapper.setBackground(new Color(245, 247, 250));
+        wrapper.add(p, BorderLayout.CENTER);
+        return wrapper;
     }
 }

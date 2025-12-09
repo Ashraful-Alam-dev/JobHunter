@@ -62,9 +62,6 @@ public class AuthService {
         return null;
     }
 
-    // -------------------------
-    // Update profile method
-    // -------------------------
     public boolean updateProfile(String userId, String newName, String newEmail, String newContact, String newDescription) {
         List<User> users = getAllUsers();
         boolean updated = false;
