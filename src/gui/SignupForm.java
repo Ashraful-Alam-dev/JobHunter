@@ -16,7 +16,6 @@ public class SignupForm extends JFrame {
     private JTextField emailField;
     private JTextField contactField;
     private JTextField descriptionField;
-
     private JComboBox<String> roleBox;
 
     public SignupForm(AuthService authService) {
@@ -28,17 +27,19 @@ public class SignupForm extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        initUI();
+        initUI(); // setup UI components
     }
 
     private void initUI() {
-        JPanel panel = new JPanel(new GridLayout(12, 1, 10, 10)); // bigger gaps
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50)); // more padding
+        // main panel with grid layout for form fields
+        JPanel panel = new JPanel(new GridLayout(12, 1, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
 
         Font labelFont = new Font("SansSerif", Font.BOLD, 18);
         Font fieldFont = new Font("SansSerif", Font.PLAIN, 16);
         Font buttonFont = new Font("SansSerif", Font.BOLD, 16);
 
+        // add labels and text fields
         JLabel lblName = new JLabel("Full Name:");
         lblName.setFont(labelFont);
         nameField = new JTextField();
@@ -67,7 +68,7 @@ public class SignupForm extends JFrame {
         panel.add(lblPassword);
         panel.add(passwordField);
 
-        JLabel lblContact = new JLabel("Contact No.:");
+        JLabel lblContact = new JLabel("Contact No:");
         lblContact.setFont(labelFont);
         contactField = new JTextField();
         contactField.setFont(fieldFont);
@@ -88,13 +89,15 @@ public class SignupForm extends JFrame {
         panel.add(lblRole);
         panel.add(roleBox);
 
+        // signup button
         JButton btnSignup = new JButton("Create Account");
         btnSignup.setFont(buttonFont);
-        btnSignup.setBackground(new Color(62, 180, 137)); // green color
+        btnSignup.setBackground(new Color(62, 180, 137)); // green
         btnSignup.setForeground(Color.WHITE);
         btnSignup.setFocusPainted(false);
         btnSignup.addActionListener(this::handleSignup);
 
+        // back to login button
         JButton btnBack = new JButton("Back to Login");
         btnBack.setFont(buttonFont);
         btnBack.setBackground(new Color(230, 230, 230)); // light gray
@@ -111,6 +114,7 @@ public class SignupForm extends JFrame {
         add(panel, BorderLayout.CENTER);
     }
 
+    // validate input and create account
     private void handleSignup(ActionEvent e) {
 
         String username = usernameField.getText().trim();
@@ -121,6 +125,7 @@ public class SignupForm extends JFrame {
         String description = descriptionField.getText().trim();
         String role = roleBox.getSelectedItem().toString();
 
+        // check required fields
         if (username.isEmpty() || password.isEmpty() || name.isEmpty() ||
                 email.isEmpty() || contact.isEmpty() || description.isEmpty()) {
             JOptionPane.showMessageDialog(this,
@@ -130,6 +135,7 @@ public class SignupForm extends JFrame {
             return;
         }
 
+        // password length validation
         if (password.length() < 4) {
             JOptionPane.showMessageDialog(this,
                     "Password must be at least 4 characters!",
@@ -138,6 +144,7 @@ public class SignupForm extends JFrame {
             return;
         }
 
+        // attempt signup
         boolean success = authService.signup(username, password, role, name, email, contact, description);
 
         if (!success) {
@@ -152,6 +159,6 @@ public class SignupForm extends JFrame {
                 "Account created successfully!\nPlease login now.");
 
         new LoginForm(authService).setVisible(true);
-        dispose();
+        dispose(); // close signup form
     }
 }

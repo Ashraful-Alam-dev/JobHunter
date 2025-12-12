@@ -19,10 +19,10 @@ public class ApplicantDashboard extends JFrame {
     private final ApplicationService applicationService;
     private final User applicant;
 
-    private JTable jobTable;
-    private JTable appTable;
+    private JTable jobTable;   // Table showing available jobs
+    private JTable appTable;   // Table showing applicant's applications
 
-    // Soft maroon theme
+    // Theme colors
     private final Color HEADER_COLOR = new Color(212, 161, 171);
     private final Color TABLE_BG = new Color(245, 247, 250);
 
@@ -41,6 +41,7 @@ public class ApplicantDashboard extends JFrame {
         initUI();
     }
 
+    // Initialize main UI components
     private void initUI() {
         add(createTopBar(), BorderLayout.NORTH);
 
@@ -52,11 +53,7 @@ public class ApplicantDashboard extends JFrame {
             protected void paintTabBackground(Graphics g, int tabPlacement, int tabIndex,
                                               int x, int y, int w, int h, boolean isSelected) {
                 Graphics2D g2 = (Graphics2D) g;
-                if (isSelected) {
-                    g2.setColor(new Color(225, 185, 190));
-                } else {
-                    g2.setColor(HEADER_COLOR);
-                }
+                g2.setColor(isSelected ? new Color(225, 185, 190) : HEADER_COLOR);
                 g2.fillRect(x, y, w, h);
             }
         });
@@ -68,6 +65,7 @@ public class ApplicantDashboard extends JFrame {
         add(tabs, BorderLayout.CENTER);
     }
 
+    // Top bar with title, profile & logout buttons
     private JPanel createTopBar() {
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -112,6 +110,7 @@ public class ApplicantDashboard extends JFrame {
         return topBar;
     }
 
+    // Panel listing all approved jobs
     private JPanel createJobPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(TABLE_BG);
@@ -129,7 +128,7 @@ public class ApplicantDashboard extends JFrame {
         jobTable.getTableHeader().setForeground(Color.BLACK);
         jobTable.getTableHeader().setPreferredSize(new Dimension(0, 32));
 
-        loadJobs();
+        loadJobs(); // Populate table
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 10));
         btnPanel.setBackground(TABLE_BG);
@@ -137,6 +136,7 @@ public class ApplicantDashboard extends JFrame {
         JButton btnApply = new JButton("Apply for Selected Job");
         JButton btnViewJob = new JButton("View Recruiter/Job Details");
 
+        // Style buttons
         for (JButton b : new JButton[]{btnApply, btnViewJob}) {
             b.setFont(new Font("SansSerif", Font.PLAIN, 16));
             b.setBackground(HEADER_COLOR);
@@ -158,6 +158,7 @@ public class ApplicantDashboard extends JFrame {
         return panel;
     }
 
+    // Panel showing applicant's submitted applications
     private JPanel createApplicationPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(TABLE_BG);
@@ -197,6 +198,7 @@ public class ApplicantDashboard extends JFrame {
         return panel;
     }
 
+    // Load all approved jobs into table
     private void loadJobs() {
         List<Job> jobs = jobService.getApprovedJobs();
         String[] cols = {"Job ID", "Title", "Description", "Company", "Salary Range", "Recruiter ID"};
@@ -216,6 +218,7 @@ public class ApplicantDashboard extends JFrame {
         jobTable.setModel(model);
     }
 
+    // Load all applications submitted by this applicant
     private void loadApplications() {
         List<Application> apps = applicationService.getApplicationsByApplicant(applicant.getUserId());
         String[] cols = {"Application ID", "Job Title", "Status"};
@@ -233,13 +236,13 @@ public class ApplicantDashboard extends JFrame {
         appTable.setModel(model);
     }
 
+    // Apply for selected job
     private void applyForJob() {
         int row = jobTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "Select a job to apply!");
             return;
         }
-
         String jobId = jobTable.getValueAt(row, 0).toString();
         if (applicationService.applyForJob(jobId, applicant.getUserId())) {
             JOptionPane.showMessageDialog(this, "Applied successfully!");
@@ -247,13 +250,13 @@ public class ApplicantDashboard extends JFrame {
         }
     }
 
+    // View details of selected job + recruiter
     private void viewSelectedJobOrRecruiter() {
         int row = jobTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "Select a job first!");
             return;
         }
-
         String jobId = jobTable.getValueAt(row, 0).toString();
         Job job = jobService.getAllJobs().stream()
                 .filter(j -> j.getJobId().equals(jobId))
@@ -282,6 +285,7 @@ public class ApplicantDashboard extends JFrame {
         }
     }
 
+    // View details of selected application + associated job
     private void viewSelectedApplication() {
         int row = appTable.getSelectedRow();
         if (row == -1) {
@@ -315,6 +319,7 @@ public class ApplicantDashboard extends JFrame {
         }
     }
 
+    // Wrap panel to add consistent padding
     private JPanel wrapPanel(JPanel p) {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

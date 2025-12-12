@@ -13,11 +13,11 @@ import java.util.List;
 
 public class AdminDashboard extends JFrame {
 
-    private final JobService jobService;
-    private final AuthService authService;
-    private final User currentUser;
+    private final JobService jobService;     // Service to manage jobs
+    private final AuthService authService;   // Service for authentication/user data
+    private final User currentUser;          // Currently logged-in admin
 
-    private JTable jobTable;
+    private JTable jobTable;                 // Table displaying all jobs
 
     public AdminDashboard(AuthService authService, User currentUser) {
         this.authService = authService;
@@ -34,8 +34,8 @@ public class AdminDashboard extends JFrame {
         initUI();
     }
 
+    // Initialize main UI components
     private void initUI() {
-
         add(createTopBar(), BorderLayout.NORTH);
 
         JTabbedPane tabs = new JTabbedPane();
@@ -43,8 +43,9 @@ public class AdminDashboard extends JFrame {
         tabs.setBackground(new Color(220, 220, 220));
         tabs.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
 
-        tabs.add("Job Management", wrapPanel(createJobPanel()));
+        tabs.add("Job Management", wrapPanel(createJobPanel())); // Jobs tab
 
+        // User management tab with button
         JPanel userPanel = new JPanel(new FlowLayout());
         userPanel.setBackground(Color.WHITE);
 
@@ -59,12 +60,12 @@ public class AdminDashboard extends JFrame {
                 new UserListView(authService, currentUser).setVisible(true));
 
         userPanel.add(btnViewUsers);
-
         tabs.add("User Management", wrapPanel(userPanel));
 
         add(tabs, BorderLayout.CENTER);
     }
 
+    // Top bar with dashboard title and logout button
     private JPanel createTopBar() {
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -89,7 +90,7 @@ public class AdminDashboard extends JFrame {
         btnLogout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         btnLogout.addActionListener(e -> {
-            new LoginForm(authService).setVisible(true);
+            new LoginForm(authService).setVisible(true); // Return to login
             dispose();
         });
 
@@ -101,6 +102,7 @@ public class AdminDashboard extends JFrame {
         return topBar;
     }
 
+    // Panel displaying all jobs with management buttons
     private JPanel createJobPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
@@ -108,20 +110,20 @@ public class AdminDashboard extends JFrame {
         jobTable = new JTable();
         jobTable.setRowHeight(26);
         jobTable.setFont(new Font("SansSerif", Font.PLAIN, 15));
-
         jobTable.setShowGrid(true);
         jobTable.setGridColor(new Color(215, 215, 215));
         jobTable.setIntercellSpacing(new Dimension(6, 6));
-
         jobTable.setBackground(Color.WHITE);
         jobTable.setForeground(Color.BLACK);
 
+        // Custom header styling
         JTableHeaderRenderer headerRenderer = new JTableHeaderRenderer();
         jobTable.getTableHeader().setDefaultRenderer(headerRenderer);
         jobTable.getTableHeader().setPreferredSize(new Dimension(0, 32));
 
-        loadJobs();
+        loadJobs(); // Populate table
 
+        // Buttons for managing selected job
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 12));
         btnPanel.setBackground(Color.WHITE);
         btnPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
@@ -135,6 +137,7 @@ public class AdminDashboard extends JFrame {
         btnReject.addActionListener(e -> updateJobStatus("Rejected"));
         btnDelete.addActionListener(e -> deleteSelectedJob());
 
+        // View job details in a dialog
         btnViewJob.addActionListener(e -> {
             int row = jobTable.getSelectedRow();
             if (row == -1) {
@@ -164,6 +167,7 @@ public class AdminDashboard extends JFrame {
         return panel;
     }
 
+    // Utility to create styled buttons
     private JButton styledButton(String text) {
         JButton b = new JButton(text);
         b.setFont(new Font("SansSerif", Font.PLAIN, 15));
@@ -175,6 +179,7 @@ public class AdminDashboard extends JFrame {
         return b;
     }
 
+    // Custom table header renderer
     private static class JTableHeaderRenderer extends DefaultTableCellRenderer {
         public JTableHeaderRenderer() {
             setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -191,6 +196,7 @@ public class AdminDashboard extends JFrame {
         }
     }
 
+    // Load all jobs into table
     private void loadJobs() {
         List<Job> jobs = jobService.getAllJobs();
 
@@ -214,6 +220,7 @@ public class AdminDashboard extends JFrame {
         jobTable.setModel(model);
     }
 
+    // Update status of selected job
     private void updateJobStatus(String newStatus) {
         int row = jobTable.getSelectedRow();
         if (row == -1) {
@@ -229,6 +236,7 @@ public class AdminDashboard extends JFrame {
         }
     }
 
+    // Delete selected job
     private void deleteSelectedJob() {
         int row = jobTable.getSelectedRow();
         if (row == -1) {
@@ -244,6 +252,7 @@ public class AdminDashboard extends JFrame {
         }
     }
 
+    // Wrap panel with padding and background
     private JPanel wrapPanel(JPanel p) {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

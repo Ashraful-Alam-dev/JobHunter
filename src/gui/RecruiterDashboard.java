@@ -22,11 +22,11 @@ public class RecruiterDashboard extends JFrame {
     private AuthService authService;
     private ApplicationService applicationService;
 
-    private JTable jobTable;
-    private JTable appTable;
+    private JTable jobTable;  // Table showing recruiter's jobs
+    private JTable appTable;  // Table showing applications to recruiter's jobs
 
-    private final Color HEADER_COLOR = new Color(173, 216, 230);
-    private final Color TABLE_BG = new Color(245, 247, 250);
+    private final Color HEADER_COLOR = new Color(173, 216, 230); // Soft blue header
+    private final Color TABLE_BG = new Color(245, 247, 250);     // Background
 
     public RecruiterDashboard(User recruiter, AuthService authService) {
         this.recruiter = recruiter;
@@ -45,6 +45,7 @@ public class RecruiterDashboard extends JFrame {
         initUI();
     }
 
+    // Initialize main UI components
     private void initUI() {
         add(createTopBar(), BorderLayout.NORTH);
 
@@ -59,6 +60,7 @@ public class RecruiterDashboard extends JFrame {
         add(tabs, BorderLayout.CENTER);
     }
 
+    // Top bar with title, profile & logout buttons
     private JPanel createTopBar() {
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -103,24 +105,15 @@ public class RecruiterDashboard extends JFrame {
         return topBar;
     }
 
+    // Panel showing recruiter's posted jobs
     private JPanel createJobPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(TABLE_BG);
 
         jobTable = new JTable();
-        jobTable.setRowHeight(26);
-        jobTable.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        jobTable.setShowGrid(true);
-        jobTable.setGridColor(new Color(220, 220, 220));
-        jobTable.setBackground(Color.WHITE);
-        jobTable.setSelectionBackground(new Color(220, 240, 255));
+        styleTable(jobTable);
 
-        jobTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
-        jobTable.getTableHeader().setBackground(HEADER_COLOR);
-        jobTable.getTableHeader().setForeground(Color.BLACK);
-        jobTable.getTableHeader().setPreferredSize(new Dimension(0, 32));
-
-        loadJobs();
+        loadJobs(); // Populate jobs table
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 10));
         btnPanel.setBackground(TABLE_BG);
@@ -130,6 +123,7 @@ public class RecruiterDashboard extends JFrame {
         JButton btnDelete = new JButton("Delete Job");
         JButton btnViewJob = new JButton("View Job Details");
 
+        // Style buttons
         for (JButton b : new JButton[]{btnPost, btnUpdate, btnDelete, btnViewJob}) {
             b.setFont(new Font("SansSerif", Font.PLAIN, 16));
             b.setBackground(HEADER_COLOR);
@@ -139,13 +133,14 @@ public class RecruiterDashboard extends JFrame {
             b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
 
+        // Button actions
         btnPost.addActionListener(e -> {
             JobPostForm postForm = new JobPostForm(recruiter, jobService);
             postForm.setVisible(true);
             postForm.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
-                    loadJobs();
+                    loadJobs(); // Refresh table after posting
                 }
             });
         });
@@ -177,6 +172,7 @@ public class RecruiterDashboard extends JFrame {
         return panel;
     }
 
+    // Populate job table with recruiter's jobs
     private void loadJobs() {
         List<Job> jobs = jobService.getJobsByRecruiter(recruiter.getUserId());
 
@@ -199,6 +195,7 @@ public class RecruiterDashboard extends JFrame {
         jobTable.setModel(model);
     }
 
+    // Update selected job
     private void updateSelectedJob() {
         int row = jobTable.getSelectedRow();
         if (row == -1) return;
@@ -213,6 +210,7 @@ public class RecruiterDashboard extends JFrame {
         ).setVisible(true);
     }
 
+    // Delete selected job
     private void deleteSelectedJob() {
         int row = jobTable.getSelectedRow();
         if (row == -1) return;
@@ -226,22 +224,13 @@ public class RecruiterDashboard extends JFrame {
         }
     }
 
+    // Panel showing applications for recruiter's jobs
     private JPanel createApplicationPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(TABLE_BG);
 
         appTable = new JTable();
-        appTable.setRowHeight(26);
-        appTable.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        appTable.setShowGrid(true);
-        appTable.setGridColor(new Color(220, 220, 220));
-        appTable.setBackground(Color.WHITE);
-        appTable.setSelectionBackground(new Color(220, 240, 255));
-
-        appTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
-        appTable.getTableHeader().setBackground(HEADER_COLOR);
-        appTable.getTableHeader().setForeground(Color.BLACK);
-        appTable.getTableHeader().setPreferredSize(new Dimension(0, 32));
+        styleTable(appTable);
 
         loadApplications();
 
@@ -252,6 +241,7 @@ public class RecruiterDashboard extends JFrame {
         JButton btnCancel = new JButton("Cancel");
         JButton btnViewApp = new JButton("View Applicant/Application Details");
 
+        // Style buttons
         for (JButton b : new JButton[]{btnAccept, btnCancel, btnViewApp}) {
             b.setFont(new Font("SansSerif", Font.PLAIN, 16));
             b.setBackground(HEADER_COLOR);
@@ -303,6 +293,7 @@ public class RecruiterDashboard extends JFrame {
         return panel;
     }
 
+    // Load applications for all recruiter's jobs
     private void loadApplications() {
         List<Job> jobs = jobService.getJobsByRecruiter(recruiter.getUserId());
         List<Application> allApps = applicationService.getAllApplications();
@@ -335,6 +326,7 @@ public class RecruiterDashboard extends JFrame {
         appTable.setModel(model);
     }
 
+    // Update status of selected application
     private void updateApplicationStatus(String newStatus) {
         int row = appTable.getSelectedRow();
         if (row == -1) return;
@@ -347,11 +339,26 @@ public class RecruiterDashboard extends JFrame {
         }
     }
 
+    // Utility: Wrap panel with padding
     private JPanel wrapPanel(JPanel p) {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         wrapper.setBackground(TABLE_BG);
         wrapper.add(p, BorderLayout.CENTER);
         return wrapper;
+    }
+
+    // Utility: Apply consistent styling to tables
+    private void styleTable(JTable table) {
+        table.setRowHeight(26);
+        table.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        table.setShowGrid(true);
+        table.setGridColor(new Color(220, 220, 220));
+        table.setBackground(Color.WHITE);
+        table.setSelectionBackground(new Color(220, 240, 255));
+        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
+        table.getTableHeader().setBackground(HEADER_COLOR);
+        table.getTableHeader().setForeground(Color.BLACK);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 32));
     }
 }

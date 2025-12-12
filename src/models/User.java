@@ -39,6 +39,7 @@ public class User {
     public void setDescription(String description) { this.description = description; }
 
     public String toLine() {
+        // Convert user data to a single savable line
         return userId + "|" + username + "|" + password + "|" +
                 role + "|" + name + "|" + email + "|" + contact + "|" + description;
     }
@@ -46,9 +47,12 @@ public class User {
     public static User fromLine(String line) {
         try {
             String[] p = line.split("\\|");
-            return new User(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
+            return new User(
+                    p[0], p[1], p[2], p[3],
+                    p[4], p[5], p[6], p[7]
+            );
         } catch (Exception e) {
-            return null;
+            return null; // invalid line
         }
     }
 }

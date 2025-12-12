@@ -14,7 +14,7 @@ public class AuthService {
 
     public AuthService(FileService fs) {
         this.fileService = fs;
-        fileService.createIfNotExists(USER_FILE);
+        fileService.createIfNotExists(USER_FILE); // ensure file exists
     }
 
     public FileService getFileService() {
@@ -25,6 +25,7 @@ public class AuthService {
         List<String> lines = fileService.readAllLines(USER_FILE);
         List<User> users = new ArrayList<>();
 
+        // Convert file lines into User objects
         for (String line : lines) {
             User u = User.fromLine(line);
             if (u != null) users.add(u);
@@ -34,13 +35,17 @@ public class AuthService {
 
     private void saveAll(List<User> users) {
         List<String> lines = new ArrayList<>();
+
+        // Convert User objects back into text lines
         for (User u : users) lines.add(u.toLine());
+
         fileService.writeAllLines(USER_FILE, lines);
     }
 
     public boolean signup(String username, String password, String role,
                           String name, String email, String contact, String description) {
 
+        // Prevent duplicate usernames
         for (User u : getAllUsers()) {
             if (u.getUsername().equalsIgnoreCase(username))
                 return false;
@@ -54,6 +59,7 @@ public class AuthService {
     }
 
     public User login(String username, String password) {
+        // Basic username/password match
         for (User u : getAllUsers()) {
             if (u.getUsername().equals(username) &&
                     u.getPassword().equals(password))
@@ -62,12 +68,15 @@ public class AuthService {
         return null;
     }
 
-    public boolean updateProfile(String userId, String newName, String newEmail, String newContact, String newDescription) {
+    public boolean updateProfile(String userId, String newName, String newEmail,
+                                 String newContact, String newDescription) {
+
         List<User> users = getAllUsers();
         boolean updated = false;
 
         for (User u : users) {
             if (u.getUserId().equals(userId)) {
+                // Update editable fields
                 u.setName(newName);
                 u.setEmail(newEmail);
                 u.setContact(newContact);
@@ -78,7 +87,7 @@ public class AuthService {
         }
 
         if (updated) {
-            saveAll(users);
+            saveAll(users); // rewrite updated list
         }
 
         return updated;

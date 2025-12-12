@@ -3,7 +3,7 @@ package models;
 public class Application {
 
     private String applicationId;
-    private String jobId;       // internal storage
+    private String jobId;       // job being applied for
     private String applicantId;
     private String status;
 
@@ -23,6 +23,7 @@ public class Application {
     public void setStatus(String status) { this.status = status; }
 
     public String toLine() {
+        // Convert object to a single savable line
         return applicationId + "|" + jobId + "|" + applicantId + "|" + status;
     }
 
@@ -31,7 +32,7 @@ public class Application {
             String[] p = line.split("\\|");
             return new Application(p[0], p[1], p[2], p[3]);
         } catch (Exception e) {
-            return null;
+            return null; // invalid record format
         }
     }
 }

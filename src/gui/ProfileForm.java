@@ -27,19 +27,20 @@ public class ProfileForm extends JFrame {
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(230, 245, 240)); // soft teal background
 
-        initUI();
+        initUI(); // initialize UI components
     }
 
     private void initUI() {
+        // main panel with grid layout for labels and input fields
         JPanel panel = new JPanel(new GridLayout(9, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
         panel.setBackground(Color.WHITE);
 
         Font labelFont = new Font("SansSerif", Font.PLAIN, 16);
         Font fieldFont = new Font("SansSerif", Font.PLAIN, 16);
+        Color fieldBg = new Color(240, 250, 245); // light teal input fields
 
-        Color fieldBg = new Color(240, 250, 245); // light teal for input fields
-
+        // Name field
         JLabel lblName = new JLabel("Full Name:");
         lblName.setFont(labelFont);
         panel.add(lblName);
@@ -48,6 +49,7 @@ public class ProfileForm extends JFrame {
         nameField.setBackground(fieldBg);
         panel.add(nameField);
 
+        // Email field
         JLabel lblEmail = new JLabel("Email:");
         lblEmail.setFont(labelFont);
         panel.add(lblEmail);
@@ -56,6 +58,7 @@ public class ProfileForm extends JFrame {
         emailField.setBackground(fieldBg);
         panel.add(emailField);
 
+        // Contact field
         JLabel lblContact = new JLabel("Contact:");
         lblContact.setFont(labelFont);
         panel.add(lblContact);
@@ -64,6 +67,7 @@ public class ProfileForm extends JFrame {
         contactField.setBackground(fieldBg);
         panel.add(contactField);
 
+        // Description field
         JLabel lblDesc = new JLabel("Description:");
         lblDesc.setFont(labelFont);
         panel.add(lblDesc);
@@ -72,6 +76,7 @@ public class ProfileForm extends JFrame {
         descriptionField.setBackground(fieldBg);
         panel.add(descriptionField);
 
+        // Save button
         JButton btnSave = new JButton("Save");
         btnSave.setFont(new Font("SansSerif", Font.BOLD, 16));
         btnSave.setBackground(new Color(102, 204, 153)); // teal-green button
@@ -79,6 +84,8 @@ public class ProfileForm extends JFrame {
         btnSave.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
         btnSave.setFocusPainted(false);
         btnSave.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // action to save profile changes
         btnSave.addActionListener(e -> {
             boolean ok = authService.updateProfile(
                     user.getUserId(),
@@ -90,7 +97,7 @@ public class ProfileForm extends JFrame {
 
             if (ok) {
                 JOptionPane.showMessageDialog(this, "Profile updated!");
-                dispose();
+                dispose(); // close form
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to update profile.", "Error", JOptionPane.ERROR_MESSAGE);
             }

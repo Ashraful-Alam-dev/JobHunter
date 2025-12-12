@@ -1,3 +1,3 @@
-﻿1a2b3c4d-0001|admin|admin123|admin|System Administrator|admin@example.com|1234567890|Administrator of the system
+﻿1a2b3c4d-0001|admin|admin123|Admin|System Administrator|admin@example.com|1234567890|Administrator of the system
 948191df-8841-49bd-be6d-7b2a97530bbf|nahid|nahid123|Recruiter|Nahid Imran|nooo|7i873345|Software Industry
 ae4728ca-1c9f-4c12-ab0b-fd7b80055203|mithila|mithila123|Applicant|Mithila Jahan|09575|688888|Graduated from CSE, DIU

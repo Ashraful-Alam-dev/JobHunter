@@ -6,9 +6,9 @@ public class Job {
     private String recruiterId;
     private String title;
     private String description;
-    private String companyName;   // optional
-    private String salaryRange;   // required
-    private String status;        // Pending, Approved, Rejected
+    private String companyName;
+    private String salaryRange;
+    private String status;
 
     public Job(String jobId, String recruiterId, String title, String description,
                String companyName, String salaryRange, String status) {
@@ -17,7 +17,7 @@ public class Job {
         this.recruiterId = recruiterId;
         this.title = title;
         this.description = description;
-        this.companyName = companyName == null ? "" : companyName;
+        this.companyName = companyName == null ? "" : companyName; // avoid null
         this.salaryRange = salaryRange;
         this.status = status;
     }
@@ -25,28 +25,19 @@ public class Job {
     public static Job fromLine(String line) {
         String[] p = line.split("\\|");
 
-        if (p.length != 7) return null;
+        if (p.length != 7) return null; // invalid format
 
         return new Job(
-                p[0],
-                p[1],
-                p[2],
-                p[3],
-                p[4],
-                p[5],
-                p[6]
+                p[0], p[1], p[2], p[3],
+                p[4], p[5], p[6]
         );
     }
 
     public String toLine() {
+        // Convert job data to a single savable line
         return String.join("|",
-                jobId,
-                recruiterId,
-                title,
-                description,
-                companyName,
-                salaryRange,
-                status
+                jobId, recruiterId, title, description,
+                companyName, salaryRange, status
         );
     }
 

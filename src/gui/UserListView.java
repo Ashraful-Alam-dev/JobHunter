@@ -15,8 +15,8 @@ public class UserListView extends JFrame {
     private final User currentUser;
     private JTable userTable;
 
-    // Light vibrant theme colors
-    private final Color ACCENT = new Color(52, 152, 219);  // Bright blue
+    // Theme colors
+    private final Color ACCENT = new Color(52, 152, 219);  // bright blue
     private final Color BACKGROUND = new Color(245, 247, 250);
     private final Color PANEL_BG = Color.WHITE;
 
@@ -30,15 +30,17 @@ public class UserListView extends JFrame {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         getContentPane().setBackground(BACKGROUND);
 
-        initUI();
-        loadUsers();
+        initUI();      // setup UI components
+        loadUsers();   // load user data into table
     }
 
     private void initUI() {
+        // main panel with padding and border layout
         JPanel panel = new JPanel(new BorderLayout(12, 12));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         panel.setBackground(PANEL_BG);
 
+        // configure table to show users
         userTable = new JTable();
         userTable.setFont(new Font("SansSerif", Font.PLAIN, 15));
         userTable.setRowHeight(28);
@@ -48,6 +50,7 @@ public class UserListView extends JFrame {
         userTable.setSelectionBackground(new Color(220, 240, 255));
         userTable.setSelectionForeground(Color.BLACK);
 
+        // table header styling
         userTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
         userTable.getTableHeader().setBackground(new Color(245, 245, 245));
         userTable.getTableHeader().setForeground(new Color(50, 50, 50));
@@ -57,6 +60,7 @@ public class UserListView extends JFrame {
 
         panel.add(scrollPane, BorderLayout.CENTER);
 
+        // bottom button panel
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 12));
         btnPanel.setBackground(PANEL_BG);
 
@@ -67,9 +71,10 @@ public class UserListView extends JFrame {
         btnRefresh.setBackground(ACCENT);
         btnRefresh.setForeground(Color.WHITE);
 
-        btnRefresh.addActionListener(e -> loadUsers());
-        btnDelete.addActionListener(e -> deleteSelectedUser());
-        btnViewUser.addActionListener(e -> showUserDetails());
+        // button actions
+        btnRefresh.addActionListener(e -> loadUsers());       // reload table
+        btnDelete.addActionListener(e -> deleteSelectedUser());// delete selected user
+        btnViewUser.addActionListener(e -> showUserDetails());// show details popup
 
         btnPanel.add(btnRefresh);
         btnPanel.add(btnDelete);
@@ -80,6 +85,7 @@ public class UserListView extends JFrame {
     }
 
     private JButton createSoftButton(String text) {
+        // utility to create simple styled buttons with hover effect
         JButton btn = new JButton(text);
         btn.setFont(new Font("SansSerif", Font.PLAIN, 15));
         btn.setBackground(new Color(230, 230, 230));
@@ -87,6 +93,7 @@ public class UserListView extends JFrame {
         btn.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
         btn.setFocusPainted(false);
 
+        // hover effect
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btn.setBackground(new Color(210, 210, 210));
@@ -106,32 +113,34 @@ public class UserListView extends JFrame {
             return;
         }
 
+        // build detail message from table row
         String details =
                 "User ID: " + userTable.getValueAt(row, 0) +
-                        "\nUsername: " + userTable.getValueAt(row, 1) +
-                        "\nRole: " + userTable.getValueAt(row, 2) +
-                        "\nName: " + userTable.getValueAt(row, 3) +
-                        "\nEmail: " + userTable.getValueAt(row, 4) +
+                        "\nName: " + userTable.getValueAt(row, 1) +
+                        "\nUsername: " + userTable.getValueAt(row, 2) +
+                        "\nEmail: " + userTable.getValueAt(row, 3) +
+                        "\nRole: " + userTable.getValueAt(row, 4) +
                         "\nContact: " + userTable.getValueAt(row, 5);
 
         JOptionPane.showMessageDialog(this, details, "User Details", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void loadUsers() {
+        // fetch all users and populate table
         List<User> users = authService.getAllUsers();
 
-        String[] columns = {"User ID", "Username", "Role", "Name", "Email", "Contact"};
+        String[] columns = {"User ID", "Name", "Username", "Email", "Role", "Contact"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) { return false; } // table is read-only
         };
 
         for (User u : users) {
             model.addRow(new Object[]{
                     u.getUserId(),
-                    u.getUsername(),
-                    u.getRole(),
                     u.getName(),
+                    u.getUsername(),
                     u.getEmail(),
+                    u.getRole(),
                     u.getContact()
             });
         }
@@ -163,16 +172,19 @@ public class UserListView extends JFrame {
             try {
                 FileService fs = authService.getFileService();
                 List<User> users = authService.getAllUsers();
+
+                // remove user from list
                 boolean removed = users.removeIf(u -> u.getUserId().equals(userId));
 
                 if (removed) {
+                    // rewrite file without deleted user
                     List<String> lines = users.stream()
                             .map(User::toLine)
                             .toList();
                     fs.writeAllLines("users.txt", lines);
 
                     JOptionPane.showMessageDialog(this, "User deleted successfully!");
-                    loadUsers();
+                    loadUsers(); // refresh table
                 } else {
                     JOptionPane.showMessageDialog(this, "Failed to delete user!");
                 }

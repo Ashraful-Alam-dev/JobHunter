@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
+// Form for recruiters to post a new job
 public class JobPostForm extends JFrame {
 
     private final User recruiter;
@@ -27,7 +28,7 @@ public class JobPostForm extends JFrame {
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(245, 247, 250));
 
-        initUI();
+        initUI(); // initialize form components
     }
 
     private void initUI() {
@@ -35,6 +36,7 @@ public class JobPostForm extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         panel.setBackground(Color.WHITE);
 
+        // Job Title
         JLabel lblTitle = new JLabel("Job Title:");
         lblTitle.setFont(new Font("SansSerif", Font.PLAIN, 15));
         panel.add(lblTitle);
@@ -44,17 +46,18 @@ public class JobPostForm extends JFrame {
         titleField.setBackground(new Color(250, 250, 250));
         panel.add(titleField);
 
+        // Job Description
         JLabel lblDesc = new JLabel("Job Description:");
         lblDesc.setFont(new Font("SansSerif", Font.PLAIN, 15));
         panel.add(lblDesc);
 
         descArea = new JTextArea(5, 20);
-        descArea.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        descArea.setFont(new Font("SansSerif", Font.PLAIN, 10));
         descArea.setBackground(new Color(250, 250, 250));
-        JScrollPane descScroll = new JScrollPane(descArea);
-        panel.add(descScroll);
+        panel.add(descArea);
 
-        JLabel lblCompany = new JLabel("Company Name (optional):");
+        // Company Name (optional)
+        JLabel lblCompany = new JLabel("Company Name (if exists):");
         lblCompany.setFont(new Font("SansSerif", Font.PLAIN, 15));
         panel.add(lblCompany);
 
@@ -63,7 +66,8 @@ public class JobPostForm extends JFrame {
         companyField.setBackground(new Color(250, 250, 250));
         panel.add(companyField);
 
-        JLabel lblSalary = new JLabel("Salary Range (required):");
+        // Salary Range
+        JLabel lblSalary = new JLabel("Salary Range:");
         lblSalary.setFont(new Font("SansSerif", Font.PLAIN, 15));
         panel.add(lblSalary);
 
@@ -72,9 +76,10 @@ public class JobPostForm extends JFrame {
         salaryField.setBackground(new Color(250, 250, 250));
         panel.add(salaryField);
 
+        // Post Job Button
         JButton btnPost = new JButton("Post Job");
         btnPost.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        btnPost.setBackground(new Color(173, 216, 230));
+        btnPost.setBackground(new Color(173, 216, 230)); // light blue
         btnPost.setForeground(Color.BLACK);
         btnPost.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
         btnPost.setFocusPainted(false);
@@ -85,6 +90,7 @@ public class JobPostForm extends JFrame {
         add(panel, BorderLayout.CENTER);
     }
 
+    // Validate inputs and submit job posting
     private void postJob(ActionEvent e) {
         String title = titleField.getText().trim();
         String desc = descArea.getText().trim();
@@ -99,6 +105,6 @@ public class JobPostForm extends JFrame {
         jobService.postJob(recruiter.getUserId(), title, desc, company, salary);
 
         JOptionPane.showMessageDialog(this, "Job posted! Pending approval.");
-        dispose();
+        dispose(); // close form after posting
     }
 }

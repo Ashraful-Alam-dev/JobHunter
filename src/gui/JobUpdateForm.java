@@ -5,6 +5,7 @@ import services.JobService;
 import javax.swing.*;
 import java.awt.*;
 
+// Form for updating an existing job
 public class JobUpdateForm extends JFrame {
 
     private JobService jobService;
@@ -36,6 +37,7 @@ public class JobUpdateForm extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         panel.setBackground(Color.WHITE);
 
+        // Job Title
         JLabel lblTitle = new JLabel("Job Title:");
         lblTitle.setFont(new Font("SansSerif", Font.PLAIN, 15));
         panel.add(lblTitle);
@@ -45,6 +47,7 @@ public class JobUpdateForm extends JFrame {
         titleField.setBackground(new Color(250, 250, 250));
         panel.add(titleField);
 
+        // Job Description
         JLabel lblDesc = new JLabel("Job Description:");
         lblDesc.setFont(new Font("SansSerif", Font.PLAIN, 15));
         panel.add(lblDesc);
@@ -52,9 +55,10 @@ public class JobUpdateForm extends JFrame {
         descArea = new JTextArea(oldDesc);
         descArea.setFont(new Font("SansSerif", Font.PLAIN, 15));
         descArea.setBackground(new Color(250, 250, 250));
-        JScrollPane descScroll = new JScrollPane(descArea);
+        JScrollPane descScroll = new JScrollPane(descArea); // scrollable area
         panel.add(descScroll);
 
+        // Company Name
         JLabel lblCompany = new JLabel("Company Name (optional):");
         lblCompany.setFont(new Font("SansSerif", Font.PLAIN, 15));
         panel.add(lblCompany);
@@ -64,6 +68,7 @@ public class JobUpdateForm extends JFrame {
         companyField.setBackground(new Color(250, 250, 250));
         panel.add(companyField);
 
+        // Salary Range
         JLabel lblSalary = new JLabel("Salary Range (required):");
         lblSalary.setFont(new Font("SansSerif", Font.PLAIN, 15));
         panel.add(lblSalary);
@@ -73,6 +78,7 @@ public class JobUpdateForm extends JFrame {
         salaryField.setBackground(new Color(250, 250, 250));
         panel.add(salaryField);
 
+        // Save Changes button
         JButton btnSave = new JButton("Save Changes");
         btnSave.setFont(new Font("SansSerif", Font.PLAIN, 16));
         btnSave.setBackground(new Color(173, 216, 230));
@@ -81,6 +87,7 @@ public class JobUpdateForm extends JFrame {
         btnSave.setFocusPainted(false);
         btnSave.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnSave.addActionListener(e -> {
+            // validate required fields
             if (titleField.getText().trim().isEmpty() ||
                     descArea.getText().trim().isEmpty() ||
                     salaryField.getText().trim().isEmpty()) {
@@ -89,6 +96,7 @@ public class JobUpdateForm extends JFrame {
                 return;
             }
 
+            // update job in service
             if (jobService.updateJob(jobId,
                     titleField.getText().trim(),
                     descArea.getText().trim(),
@@ -96,7 +104,7 @@ public class JobUpdateForm extends JFrame {
                     salaryField.getText().trim())) {
 
                 JOptionPane.showMessageDialog(this, "Job updated! Requires re-approval.");
-                dispose();
+                dispose(); // close form after saving
             }
         });
 
