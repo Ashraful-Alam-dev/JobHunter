@@ -128,7 +128,7 @@ public class ApplicantDashboard extends JFrame {
         jobTable.getTableHeader().setForeground(Color.BLACK);
         jobTable.getTableHeader().setPreferredSize(new Dimension(0, 32));
 
-        loadJobs(); // Populate table
+        loadJobs();
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 10));
         btnPanel.setBackground(TABLE_BG);
@@ -146,7 +146,25 @@ public class ApplicantDashboard extends JFrame {
             b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
 
-        btnApply.addActionListener(e -> applyForJob());
+        btnApply.addActionListener(e -> {
+            int row = jobTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Select a job to apply!");
+                return;
+            }
+            String jobId = jobTable.getValueAt(row, 0).toString();
+            String jobTitle = jobTable.getValueAt(row, 1).toString();
+
+            boolean applied = applicationService.applyForJob(jobId, applicant.getUserId(), jobTitle);
+
+            if (applied) {
+                JOptionPane.showMessageDialog(this, "Applied successfully!");
+                loadApplications();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to apply for the job.");
+            }
+        });
+
         btnViewJob.addActionListener(e -> viewSelectedJobOrRecruiter());
 
         btnPanel.add(btnApply);
@@ -192,6 +210,41 @@ public class ApplicantDashboard extends JFrame {
 
         btnPanel.add(btnViewApp);
 
+        JButton btnDeleteApp = new JButton("Delete Selected Application");
+        btnDeleteApp.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        btnDeleteApp.setBackground(HEADER_COLOR);
+        btnDeleteApp.setForeground(Color.BLACK);
+        btnDeleteApp.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        btnDeleteApp.setFocusPainted(false);
+        btnDeleteApp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        btnDeleteApp.addActionListener(e -> {
+            int row = appTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Select an application to delete!");
+                return;
+            }
+
+            String appId = appTable.getValueAt(row, 0).toString();
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to delete this application?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                boolean deleted = applicationService.deleteApplication(appId);
+                if (deleted) {
+                    JOptionPane.showMessageDialog(this, "Application deleted successfully!");
+                    loadApplications();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to delete application.");
+                }
+            }
+        });
+
+        btnPanel.add(btnDeleteApp); // add the button to the panel
+
+
         panel.add(new JScrollPane(appTable), BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
 
@@ -221,33 +274,32 @@ public class ApplicantDashboard extends JFrame {
     // Load all applications submitted by this applicant
     private void loadApplications() {
         List<Application> apps = applicationService.getApplicationsByApplicant(applicant.getUserId());
-        String[] cols = {"Application ID", "Job Title", "Status"};
+
+        String[] cols = {"Application ID", "Job ID", "Job Title", "Status"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int row, int column) { return false; }
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         };
+
         for (Application a : apps) {
             Job job = jobService.getAllJobs().stream()
                     .filter(j -> j.getJobId().equals(a.getJobId()))
                     .findFirst()
                     .orElse(null);
-            String jobTitle = (job != null) ? job.getTitle() : a.getJobId();
-            model.addRow(new Object[]{a.getApplicationId(), jobTitle, a.getStatus()});
-        }
-        appTable.setModel(model);
-    }
 
-    // Apply for selected job
-    private void applyForJob() {
-        int row = jobTable.getSelectedRow();
-        if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Select a job to apply!");
-            return;
+            String jobTitle = (job != null) ? job.getTitle() : "N/A";
+
+            model.addRow(new Object[]{
+                    a.getApplicationId(),
+                    a.getJobId(),
+                    jobTitle,
+                    a.getStatus()
+            });
         }
-        String jobId = jobTable.getValueAt(row, 0).toString();
-        if (applicationService.applyForJob(jobId, applicant.getUserId())) {
-            JOptionPane.showMessageDialog(this, "Applied successfully!");
-            loadApplications();
-        }
+
+        appTable.setModel(model);
     }
 
     // View details of selected job + recruiter

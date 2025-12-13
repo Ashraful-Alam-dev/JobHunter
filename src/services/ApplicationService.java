@@ -38,12 +38,12 @@ public class ApplicationService {
         fileService.writeAllLines(APP_FILE, lines);
     }
 
-    public boolean applyForJob(String jobId, String applicantId) {
+    public boolean applyForJob(String jobId, String applicantId, String jobTitle) {
         String applicationId = UUID.randomUUID().toString();
         String status = "Pending";
 
         // Create and save a new job application
-        Application app = new Application(applicationId, jobId, applicantId, status);
+        Application app = new Application(applicationId, jobId, applicantId, jobTitle, status);
         fileService.appendLine(APP_FILE, app.toLine());
         return true;
     }
@@ -75,4 +75,12 @@ public class ApplicationService {
         if (found) saveAll(apps); // persist changes
         return found;
     }
+
+    public boolean deleteApplication(String applicationId) {
+        List<Application> apps = getAllApplications();
+        boolean removed = apps.removeIf(a -> a.getApplicationId().equals(applicationId));
+        if (removed) saveAll(apps);
+        return removed;
+    }
+
 }
